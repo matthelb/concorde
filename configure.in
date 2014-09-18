@@ -1,0 +1,172 @@
+#
+#   This file is part of CONCORDE
+#
+#   (c) Copyright 1995--1999 by David Applegate, Robert Bixby,
+#   Vasek Chvatal, and William Cook
+#
+#   Permission is granted for academic research use.  For other uses,
+#   contact the authors for licensing options.
+#
+#   Use at your own risk.  We make no guarantees about the
+#   correctness or usefulness of this code.
+#
+
+dnl For now, disable the configure cache
+dnl define([AC_CACHE_LOAD], )dnl
+dnl define([AC_CACHE_SAVE], )dnl
+
+dnl Process this file with autoconf to produce a configure script.
+
+AC_INIT(TSP/concorde.c)
+
+dnl Arguments - external packages.
+AC_ARG_WITH(cplex,        [  --with-cplex[=DIR]      Use cplex lp optimizer (from directory DIR)])
+AC_ARG_WITH(purify,       [  --with-purify           Use purify])
+AC_ARG_ENABLE(pthreads,   [  --enable-pthreads       Enable posix threaded cutserv])
+AC_ARG_ENABLE(ccdefaults, [  --enable-ccdefaults     Enable configured defaults for cc])
+AC_ARG_ENABLE(debugger,   [  --enable-debugger       Enable debugging information in code (-g)])
+
+AC_CANONICAL_HOST
+
+dnl *****RELEASE***** change "-yes" to "-no"
+if test "x${enable_ccdefaults-yes}" = xyes ; then
+concorde_CCDEFAULTS
+fi
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+AC_PATH_PROGS(MAKESHELL,[sh bash ksh bsh],sh)
+
+if test "x${with_purify-no}" = xyes ; then
+   CC="purify ${CC-cc}"
+fi
+
+dnl Find the suffixes for object, library, and executable files
+concorde_SUFFIXES
+
+dnl *****RELEASE***** delete
+dnl For our convenience, default paths to cplex
+if test "x${with_cplex-set}" = "xset"; then
+  case "$host" in
+    *-*-osf4*)        : ${with_cplex=/home/bixby/fmp/alpha/65f3.ev6}  ;;
+    alpha-*-linux* )  : ${with_cplex=/home/bixby/fmp/alpha_linux/50f0} ;;
+    i*-*-freebsd*)    : ${with_cplex=/home/bixby/fmp/intel_bsd/66t2} ;;
+    i*-*-linux*)      : ${with_cplex=/home/bixby/fmp/intel_linux/66t2} ;;
+    i*-*-solaris*)    : ${with_cplex=/home/bixby/fmp/intel_solaris/65f3} ;;
+    *-*-aix*)         : ${with_cplex=/user/david/fmp/rs6000/50f0}  ;;
+    *-*-irix5*)       : ${with_cplex=/home/bixby/fmp/silicon/50b2}  ;;
+dnl     *-*-irix6*)       : ${with_cplex=/home/bixby/fmp/silicon/bias980501.irix6.2}  ;;
+    *-*-irix6*)       : ${with_cplex=/home/bixby/fmp/silicon/rb980611.north}  ;;
+    sparc-*-solaris*) : ${with_cplex=/home/bixby/fmp/sparc_solaris/65f3} ;;
+    sparc-*-sunos*)   : ${with_cplex=/home/bixby/fmp/sparc_sunos/50b2} ;;
+  esac
+fi
+if test "x${with_purify-no}" = xyes ; then
+   : ${CPLEX_LIBNAME=libcplex.purify.a}
+fi
+
+dnl Checks for libraries.
+if test "x${enable_pthreads-no}" = "xyes" ; then
+   AC_DEFINE(CC_POSIXTHREADS)
+   CPPFLAGS="$CPPFLAGS -D_REENTRANT"
+   AC_CHECK_LIB(pthread, pthread_create)
+   if test "x${ac_cv_lib_pthread_pthread_create-no}" = "xno"; then
+      AC_CHECK_LIB(pthreads, pthread_create)
+      if test "x${ac_cv_lib_pthreads_pthread_create-no}" = "xno"; then
+         AC_MSG_ERROR([Couldn't find the pthreads library])
+      fi
+   fi
+fi
+AC_CHECK_LIB(m, sqrt)
+concorde_CHECK_LIB(nsl, gethostbyname)
+concorde_CHECK_LIB(socket, socket)
+AC_CHECK_LIB(bfd, bfd_open_file)
+AC_CHECK_LIB(iberty, xstrerror)
+
+dnl Cplex
+if test "x${with_cplex-yes}" != "xno" ; then
+   concorde_CHECK_CPLEX(${with_cplex-yes})
+fi
+
+if test "x${cc_cplex_found-no}" = "xyes" ; then
+   concorde_CPLEX_VERSION(${with_cplex-yes})
+   if test ${cc_cplex_version-0} -ge 6; then
+      LPSOLVER_INTERFACE=lpcplex6.c
+   else
+      if test ${cc_cplex_version-0} -ge 5; then
+         LPSOLVER_INTERFACE=lpcplex5.c
+      else
+         LPSOLVER_INTERFACE=lpcplex4.c
+      fi
+   fi
+else
+   LPSOLVER_INTERFACE=lpnone.c
+fi
+
+AC_SUBST(LPSOLVER_LIB)
+AC_SUBST(LPSOLVER_INCFLAG)
+AC_SUBST(LPSOLVER_INTERFACE)
+
+dnl Specify configuration header.
+AC_CONFIG_HEADER(INCLUDE/config.h)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_TIME
+AC_CHECK_HEADERS(stdlib.h math.h string.h strings.h errno.h assert.h sys/time.h time.h stddef.h unistd.h malloc.h sys/types.h sys/stat.h fcntl.h signal.h sys/socket.h netinet/in.h netdb.h sys/resource.h sys/param.h sys/times.h)
+
+if test "x$enable_pthreads" = "xyes" ; then
+   concorde_HEADER_PTHREAD
+fi
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+concorde_C_VOID
+AC_TYPE_SIZE_T
+AC_TYPE_PID_T
+AC_TYPE_SIGNAL
+AC_CHECK_TYPE(u_char, [unsigned char])
+
+concorde_MISSING_PROTOTYPE(printf,[#include <stdio.h>],[printf(3.0)])
+concorde_MISSING_PROTOTYPE(gethostname,[
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif],[gethostname(3.0)])
+concorde_MISSING_PROTOTYPE(getrusage,[
+#ifdef TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# ifdef HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  ifdef HAVE_TIME_H
+#   include <time.h>
+#  endif
+# endif
+#endif
+#ifdef HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif],[getrusage(3.0)])
+
+concorde_SIGNAL_METHOD
+
+concorde_ATTRIBUTE
+
+dnl some machine specific tests
+case "$host" in
+*-*-irix6* )
+dnl irix6 uses __vfork in unistd.h, but doesn't prototype it
+concorde_MISSING_PROTOTYPE(__vfork,[
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif],[__vfork(3)])
+;;
+esac
+
+dnl Checks for library functions.
+AC_CHECK_FUNCS(gethostname socket strdup getrusage times clock sleep sigaction signal)
+
+AC_OUTPUT(Makefile BIGGUY/Makefile COMBS/Makefile CUT/Makefile EDGEGEN/Makefile FMATCH/Makefile HELDKARP/Makefile INCLUDE/Makefile.common KDTREE/Makefile LINKERN/Makefile LOCALCUT/Makefile LP/Makefile PQ/Makefile TINY/Makefile TOOLS/Makefile TSP/Makefile UTIL/Makefile VERIFY/Makefile)

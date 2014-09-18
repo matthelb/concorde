@@ -1,0 +1,117 @@
+#
+#   This file is part of CONCORDE
+#
+#   (c) Copyright 1995--1999 by David Applegate, Robert Bixby,
+#   Vasek Chvatal, and William Cook
+#
+#   Permission is granted for academic research use.  For other uses,
+#   contact the authors for licensing options.
+#
+#   Use at your own risk.  We make no guarantees about the
+#   correctness or usefulness of this code.
+#
+
+@SET_MAKE@
+SHELL = @MAKESHELL@
+SRCROOT = @top_srcdir@
+BLDROOT = ..
+CCINCDIR=$(SRCROOT)/INCLUDE
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+CC = @CC@
+CFLAGS = @CFLAGS@ @CPPFLAGS@ -I$(BLDROOT)/INCLUDE -I$(CCINCDIR)
+LDFLAGS = @CFLAGS@ @LDFLAGS@
+LIBFLAGS = @LIBS@
+RANLIB = @RANLIB@
+LPSOLVER_LIB = @LPSOLVER_LIB@
+
+OBJ_SUFFIX = @OBJ_SUFFIX@
+o = $(OBJ_SUFFIX)
+
+ALLSRCS=fconvert.c tourchk.c  \
+        edgunion.c edg2len.c  showres.c  killgrun.c tourlen.c  \
+        prob2tsp.c
+
+LIBS=$(BLDROOT)/KDTREE/kdtree.@LIB_SUFFIX@ $(BLDROOT)/UTIL/util.@LIB_SUFFIX@ \
+     $(BLDROOT)/EDGEGEN/edgegen.@LIB_SUFFIX@                                 \
+     $(BLDROOT)/LINKERN/linkern.@LIB_SUFFIX@                                 \
+     $(BLDROOT)/FMATCH/fmatch.@LIB_SUFFIX@                                   \
+     $(BLDROOT)/KDTREE/kdtree.@LIB_SUFFIX@                                   \
+     $(BLDROOT)/UTIL/util.@LIB_SUFFIX@
+
+all: showres tourchk tourlen prob2tsp edg2len edgunion fconvert
+
+everything: all killgrun
+
+fconvert: fconvert.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ fconvert.$o $(LIBS) $(LIBFLAGS)
+
+tourchk: tourchk.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ tourchk.$o $(LIBS) $(LIBFLAGS)
+
+showres: showres.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ showres.$o $(LIBS) $(LIBFLAGS)
+
+killgrun: killgrun.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ killgrun.$o $(LIBS) $(LIBFLAGS)
+
+prob2tsp: prob2tsp.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ prob2tsp.$o $(LIBS) $(LIBFLAGS)
+
+tourlen: tourlen.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ tourlen.$o $(LIBS) $(LIBFLAGS)
+
+edgunion: edgunion.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ edgunion.$o $(LIBS) $(LIBFLAGS)
+
+edg2len: edg2len.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ edg2len.$o $(LIBS) $(LIBFLAGS)
+
+tour2edg: tour2edg.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ tour2edg.$o $(LIBS) $(LIBFLAGS)
+
+tdivide: tdivide.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ tdivide.$o $(LIBS) $(LIBFLAGS)
+
+ttour: ttour.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ ttour.$o $(LIBS) $(LIBFLAGS)
+
+lkhboss: lkhboss.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ lkhboss.$o $(LIBS) $(LIBFLAGS)
+
+lkhgrunt: lkhgrunt.$o $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ lkhgrunt.$o $(LIBS) $(LIBFLAGS)
+
+
+clean:
+	-rm -f *.$o fconvert@EXE_SUFFIX@ tourchk@EXE_SUFFIX@ \
+                    showres@EXE_SUFFIX@ \
+                    prob2tsp@EXE_SUFFIX@ tourlen@EXE_SUFFIX@ \
+                    edgunion@EXE_SUFFIX@ killgrun@EXE_SUFFIX@ \
+                    edg2len@EXE_SUFFIX@
+
+$(BLDROOT)/concorde.@LIB_SUFFIX@:
+
+include ../INCLUDE/Makefile.common
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+I=$(CCINCDIR)
+I2=$(BLDROOT)/INCLUDE
+
+edg2len.$o:  edg2len.c  $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     
+edgunion.$o: edgunion.c $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     
+fconvert.$o: fconvert.c $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     
+killgrun.$o: killgrun.c $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/tsp.h      $(I)/edgegen.h  $(I)/bigguy.h   $(I)/lp.h       \
+        $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    
+prob2tsp.$o: prob2tsp.c $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     
+showres.$o:  showres.c  $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/tsp.h      $(I)/edgegen.h  $(I)/bigguy.h   $(I)/lp.h       \
+        $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    
+tourchk.$o:  tourchk.c  $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     
+tourlen.$o:  tourlen.c  $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     
+tour2edg.$o: tour2edg.c $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     
+tdivide.$o:  tdivide.c  $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     

@@ -1,0 +1,70 @@
+#
+#   This file is part of CONCORDE
+#
+#   (c) Copyright 1995--1999 by David Applegate, Robert Bixby,
+#   Vasek Chvatal, and William Cook
+#
+#   Permission is granted for academic research use.  For other uses,
+#   contact the authors for licensing options.
+#
+#   Use at your own risk.  We make no guarantees about the
+#   correctness or usefulness of this code.
+#
+
+@SET_MAKE@
+SHELL = @MAKESHELL@
+SRCROOT = @top_srcdir@
+BLDROOT = ..
+CCINCDIR=$(SRCROOT)/INCLUDE
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+CC = @CC@
+CFLAGS = @CFLAGS@ @CPPFLAGS@ -I$(BLDROOT)/INCLUDE -I$(CCINCDIR)
+LDFLAGS = @CFLAGS@ @LDFLAGS@
+LIBFLAGS = @LIBS@
+RANLIB = @RANLIB@
+
+OBJ_SUFFIX = @OBJ_SUFFIX@
+o = $(OBJ_SUFFIX)
+
+THISLIB=fmatch.@LIB_SUFFIX@
+LIBSRCS=fmatch.c
+ALLSRCS=fm_main.c $(LIBSRCS)
+
+LIBS=$(BLDROOT)/EDGEGEN/edgegen.@LIB_SUFFIX@ $(BLDROOT)/KDTREE/kdtree.@LIB_SUFFIX@ \
+     $(BLDROOT)/LINKERN/linkern.@LIB_SUFFIX@ $(BLDROOT)/UTIL/util.@LIB_SUFFIX@
+
+all: fmatch $(THISLIB)
+
+everything: all
+
+fmatch: fm_main.$o $(THISLIB) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ fm_main.$o $(THISLIB) $(LIBS) $(LIBFLAGS)
+
+clean:
+	-rm -f *.$o $(THISLIB) fmatch@EXE_SUFFIX@
+
+OBJS=$(LIBSRCS:.c=.@OBJ_SUFFIX@)
+
+$(THISLIB): $(OBJS)
+	$(AR) $(ARFLAGS) $(THISLIB) $(OBJS)
+	$(RANLIB) $(THISLIB)
+
+.PHONY: $(BLDROOT)/concorde.@LIB_SUFFIX@
+$(BLDROOT)/concorde.@LIB_SUFFIX@: $(OBJS)
+	$(AR) $(ARFLAGS) $(BLDROOT)/concorde.@LIB_SUFFIX@ $(OBJS)
+	$(RANLIB) $(BLDROOT)/concorde.@LIB_SUFFIX@
+
+include ../INCLUDE/Makefile.common
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+I=$(CCINCDIR)
+I2=$(BLDROOT)/INCLUDE
+
+fm_main.$o:  fm_main.c  $(I)/machdefs.h $(I2)/config.h  $(I)/fmatch.h   \
+        $(I)/util.h     $(I)/kdtree.h   $(I)/edgegen.h  
+fmatch.$o:   fmatch.c   $(I)/machdefs.h $(I2)/config.h  $(I)/fmatch.h   \
+        $(I)/util.h     $(I)/kdtree.h   $(I)/macrorus.h 

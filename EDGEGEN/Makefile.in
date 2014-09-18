@@ -1,0 +1,78 @@
+#
+#   This file is part of CONCORDE
+#
+#   (c) Copyright 1995--1999 by David Applegate, Robert Bixby,
+#   Vasek Chvatal, and William Cook
+#
+#   Permission is granted for academic research use.  For other uses,
+#   contact the authors for licensing options.
+#
+#   Use at your own risk.  We make no guarantees about the
+#   correctness or usefulness of this code.
+#
+
+@SET_MAKE@
+SHELL = @MAKESHELL@
+SRCROOT = @top_srcdir@
+BLDROOT = ..
+CCINCDIR=$(SRCROOT)/INCLUDE
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+CC = @CC@
+CFLAGS = @CFLAGS@ @CPPFLAGS@ -I$(BLDROOT)/INCLUDE -I$(CCINCDIR)
+LDFLAGS = @CFLAGS@ @LDFLAGS@
+LIBFLAGS = @LIBS@
+RANLIB = @RANLIB@
+
+OBJ_SUFFIX = @OBJ_SUFFIX@
+o = $(OBJ_SUFFIX)
+
+THISLIB=edgegen.@LIB_SUFFIX@
+LIBSRCS=edgegen.c  xnear.c    delaunay.c mlinkern.c
+
+ALLSRCS=eg_main.c  $(LIBSRCS)
+
+LIBS=$(BLDROOT)/KDTREE/kdtree.@LIB_SUFFIX@   $(BLDROOT)/FMATCH/fmatch.@LIB_SUFFIX@ \
+     $(BLDROOT)/LINKERN/linkern.@LIB_SUFFIX@ $(BLDROOT)/UTIL/util.@LIB_SUFFIX@
+
+all: edgegen $(THISLIB)
+
+everything: all
+
+edgegen: eg_main.$o $(THISLIB) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ eg_main.$o $(THISLIB) $(LIBS) $(LIBFLAGS)
+
+clean:
+	-rm -f *.$o $(THISLIB) edgegen@EXE_SUFFIX@
+
+OBJS=$(LIBSRCS:.c=.@OBJ_SUFFIX@)
+
+$(THISLIB): $(OBJS)
+	$(AR) $(ARFLAGS) $(THISLIB) $(OBJS)
+	$(RANLIB) $(THISLIB)
+
+.PHONY: $(BLDROOT)/concorde.@LIB_SUFFIX@
+$(BLDROOT)/concorde.@LIB_SUFFIX@: $(OBJS)
+	$(AR) $(ARFLAGS) $(BLDROOT)/concorde.@LIB_SUFFIX@ $(OBJS)
+	$(RANLIB) $(BLDROOT)/concorde.@LIB_SUFFIX@
+
+include ../INCLUDE/Makefile.common
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+I=$(CCINCDIR)
+I2=$(BLDROOT)/INCLUDE
+
+delaunay.$o: delaunay.c $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/delaunay.h $(I)/macrorus.h 
+edgegen.$o:  edgegen.c  $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/edgegen.h  $(I)/kdtree.h   $(I)/linkern.h  $(I)/fmatch.h   \
+        $(I)/delaunay.h $(I)/mlinkern.h $(I)/macrorus.h 
+eg_main.$o:  eg_main.c  $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/edgegen.h  
+mlinkern.$o: mlinkern.c $(I)/machdefs.h $(I2)/config.h  $(I)/kdtree.h   \
+        $(I)/util.h     $(I)/mlinkern.h 
+xnear.$o:    xnear.c    $(I)/machdefs.h $(I2)/config.h  $(I)/edgegen.h  \
+        $(I)/util.h     $(I)/macrorus.h 

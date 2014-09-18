@@ -1,0 +1,98 @@
+#
+#   This file is part of CONCORDE
+#
+#   (c) Copyright 1995--1999 by David Applegate, Robert Bixby,
+#   Vasek Chvatal, and William Cook
+#
+#   Permission is granted for academic research use.  For other uses,
+#   contact the authors for licensing options.
+#
+#   Use at your own risk.  We make no guarantees about the
+#   correctness or usefulness of this code.
+#
+
+# 
+# rules common to most of the makefiles
+#
+
+depend.in:
+	mv Makefile.in Makefile.in.orig
+	sed -e '/^# DO NOT DELETE THIS LINE -- make depend depends on it.$$/,$$d' < Makefile.in.orig > Makefile.in
+	echo "# DO NOT DELETE THIS LINE -- make depend depends on it." >> Makefile.in
+	echo >> Makefile.in
+	echo 'I=$$(CCINCDIR)' >> Makefile.in
+	echo 'I2=$$(BLDROOT)/INCLUDE' >> Makefile.in
+	echo >> Makefile.in
+	$(CC) $(CFLAGS) -MM \
+            `echo $(ALLSRCS) | tr ' ' '\012' | sort -u` | \
+            sed -e 's,../INCLUDE/config.h,$$(I2)/config.h,' \
+                -e 's,../INCLUDE,$$(I),g' -e 's,\.o,.$$o,g' | \
+            awk '{for(i=1;i<=NF;i++){if($$i=="\\"){next;}if(ecnt==0){ \
+            printf("%-12s ",$$i);}else if(ecnt==1){printf("%-10s ",$$i);} \
+            else{if(ecnt>=5&&ecnt%4==1)printf("\\\n        "); \
+            if(substr($$i,1,5)=="$$(I)/"||substr($$i,1,6)=="$$(I2)/") \
+            printf("%-15s ",$$i);else printf ("     %-10s ",$$i);}ecnt++;} \
+            printf("\n");ecnt=0;}' >> Makefile.in
+
+.PHONY: concorde.@LIB_SUFFIX@
+concorde.@LIB_SUFFIX@: $(BLDROOT)/concorde.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/BIGGUY/bigguy.@LIB_SUFFIX@
+$(BLDROOT)/BIGGUY/bigguy.@LIB_SUFFIX@:
+	cd $(BLDROOT)/BIGGUY; $(MAKE) bigguy.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/LOCALCUT/localcut.@LIB_SUFFIX@
+$(BLDROOT)/LOCALCUT/localcut.@LIB_SUFFIX@:
+	cd $(BLDROOT)/LOCALCUT; $(MAKE) localcut.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/CUT/cut.@LIB_SUFFIX@
+$(BLDROOT)/CUT/cut.@LIB_SUFFIX@:
+	cd $(BLDROOT)/CUT; $(MAKE) cut.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/EDGEGEN/edgegen.@LIB_SUFFIX@
+$(BLDROOT)/EDGEGEN/edgegen.@LIB_SUFFIX@:
+	cd $(BLDROOT)/EDGEGEN; $(MAKE) edgegen.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/FMATCH/fmatch.@LIB_SUFFIX@
+$(BLDROOT)/FMATCH/fmatch.@LIB_SUFFIX@:
+	cd $(BLDROOT)/FMATCH; $(MAKE) fmatch.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/HELDKARP/heldkarp.@LIB_SUFFIX@
+$(BLDROOT)/HELDKARP/heldkarp.@LIB_SUFFIX@:
+	cd $(BLDROOT)/HELDKARP; $(MAKE) heldkarp.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/KDTREE/kdtree.@LIB_SUFFIX@
+$(BLDROOT)/KDTREE/kdtree.@LIB_SUFFIX@:
+	cd $(BLDROOT)/KDTREE; $(MAKE) kdtree.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/LINKERN/linkern.@LIB_SUFFIX@
+$(BLDROOT)/LINKERN/linkern.@LIB_SUFFIX@:
+	cd $(BLDROOT)/LINKERN; $(MAKE) linkern.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/LP/lp.@LIB_SUFFIX@
+$(BLDROOT)/LP/lp.@LIB_SUFFIX@:
+	cd $(BLDROOT)/LP; $(MAKE) lp.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/PQ/pq.@LIB_SUFFIX@
+$(BLDROOT)/PQ/pq.@LIB_SUFFIX@:
+	cd $(BLDROOT)/PQ; $(MAKE) pq.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/TINY/tiny.@LIB_SUFFIX@
+$(BLDROOT)/TINY/tiny.@LIB_SUFFIX@:
+	cd $(BLDROOT)/TINY; $(MAKE) tiny.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/TSP/tsp.@LIB_SUFFIX@
+$(BLDROOT)/TSP/tsp.@LIB_SUFFIX@:
+	cd $(BLDROOT)/TSP; $(MAKE) tsp.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/COMBS/combs.@LIB_SUFFIX@
+$(BLDROOT)/COMBS/combs.@LIB_SUFFIX@:
+	cd $(BLDROOT)/COMBS; $(MAKE) combs.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/UTIL/util.@LIB_SUFFIX@
+$(BLDROOT)/UTIL/util.@LIB_SUFFIX@:
+	cd $(BLDROOT)/UTIL; $(MAKE) util.@LIB_SUFFIX@
+
+.PHONY: $(BLDROOT)/VERIFY/verify.@LIB_SUFFIX@
+$(BLDROOT)/VERIFY/verify.@LIB_SUFFIX@:
+	cd $(BLDROOT)/VERIFY; $(MAKE) verify.@LIB_SUFFIX@

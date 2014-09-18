@@ -1,0 +1,131 @@
+#
+#   This file is part of CONCORDE
+#
+#   (c) Copyright 1995--1999 by David Applegate, Robert Bixby,
+#   Vasek Chvatal, and William Cook
+#
+#   Permission is granted for academic research use.  For other uses,
+#   contact the authors for licensing options.
+#
+#   Use at your own risk.  We make no guarantees about the
+#   correctness or usefulness of this code.
+#
+
+@SET_MAKE@
+SHELL = @MAKESHELL@
+SRCROOT = @top_srcdir@
+BLDROOT = ..
+CCINCDIR=$(SRCROOT)/INCLUDE
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+CC = @CC@
+CFLAGS = @CFLAGS@ @CPPFLAGS@ -I$(BLDROOT)/INCLUDE -I$(CCINCDIR) -I$(srcdir)
+LDFLAGS = @CFLAGS@ @LDFLAGS@
+LIBFLAGS = @LIBS@
+RANLIB = @RANLIB@
+LPSOLVER_LIB = @LPSOLVER_LIB@
+
+OBJ_SUFFIX = @OBJ_SUFFIX@
+o = $(OBJ_SUFFIX)
+
+THISLIB=localcut.@LIB_SUFFIX@
+LIBSRCS=localcut.c   chunks.c   first.c      lift.c  tsporacl.c \
+        intmat.c     separate.c
+ALLSRCS=loc_main.c first_main.c checker.c peeler.c peeler2.c $(LIBSRCS)
+
+LIBS=$(BLDROOT)/CUT/cut.@LIB_SUFFIX@           $(BLDROOT)/TINY/tiny.@LIB_SUFFIX@     \
+     $(BLDROOT)/LP/lp.@LIB_SUFFIX@             $(BLDROOT)/BIGGUY/bigguy.@LIB_SUFFIX@ \
+     $(BLDROOT)/UTIL/util.@LIB_SUFFIX@
+
+LIBS2=$(BLDROOT)/TSP/tsp.@LIB_SUFFIX@           $(BLDROOT)/PQ/pq.@LIB_SUFFIX@           \
+      $(BLDROOT)/EDGEGEN/edgegen.@LIB_SUFFIX@   $(BLDROOT)/LINKERN/linkern.@LIB_SUFFIX@ \
+      $(BLDROOT)/VERIFY/verify.@LIB_SUFFIX@     $(BLDROOT)/FMATCH/fmatch.@LIB_SUFFIX@   \
+      $(BLDROOT)/KDTREE/kdtree.@LIB_SUFFIX@     $(BLDROOT)/COMBS/combs.@LIB_SUFFIX@     \
+      $(BLDROOT)/TINY/tiny.@LIB_SUFFIX@         $(BLDROOT)/LP/lp.@LIB_SUFFIX@           \
+      $(BLDROOT)/BIGGUY/bigguy.@LIB_SUFFIX@     $(BLDROOT)/UTIL/util.@LIB_SUFFIX@       \
+      $(BLDROOT)/HELDKARP/heldkarp.@LIB_SUFFIX@ $(BLDROOT)/CUT/cut.@LIB_SUFFIX@ \
+      $(BLDROOT)/TSP/tsp.@LIB_SUFFIX@           $(BLDROOT)/CUT/cut.@LIB_SUFFIX@
+
+
+all: localcut $(THISLIB)
+
+everything: all checker first peeler peeler2
+
+first: first_main.$o $(THISLIB) $(LIBS2)
+	$(CC) $(LDFLAGS) -o $@ first_main.$o $(THISLIB) $(LIBS2) $(LPSOLVER_LIB) $(LIBFLAGS)
+
+localcut: loc_main.$o $(THISLIB) $(LIBS2)
+	$(CC) $(LDFLAGS) -o $@ loc_main.$o $(THISLIB) $(LIBS2) $(LPSOLVER_LIB) $(LIBFLAGS)
+
+checker: checker.$o
+	$(CC) $(LDFLAGS) -o $@ checker.$o $(LIBFLAGS)
+
+peeler: peeler.$o $(BLDROOT)/UTIL/util.@LIB_SUFFIX@
+	$(CC) $(LDFLAGS) -o $@ peeler.$o $(BLDROOT)/UTIL/util.@LIB_SUFFIX@ $(LIBFLAGS)
+
+peeler2: peeler2.$o $(THISLIB) $(LIBS2) $(LPSOLVER_LIB)
+	$(CC) $(LDFLAGS) -o $@ peeler2.$o $(THISLIB) $(LIBS2) $(LPSOLVER_LIB) $(LIBFLAGS)
+
+rays: rays.$o $(THISLIB) $(LIBS2)
+	$(CC) $(LDFLAGS) -o $@ rays.$o $(THISLIB) $(LIBS2) $(LPSOLVER_LIB) $(LIBFLAGS)
+
+clean:
+	-rm -f *.$o $(THISLIB) first@EXE_SUFFIX@ checker@EXE_SUFFIX@ peeler@EXE_SUFFIX@ peeler2@EXE_SUFFIX@ localcut@EXE_SUFFIX@
+
+OBJS=$(LIBSRCS:.c=.@OBJ_SUFFIX@)
+
+$(THISLIB): $(OBJS)
+	$(AR) $(ARFLAGS) $(THISLIB) $(OBJS)
+	$(RANLIB) $(THISLIB)
+
+.PHONY: $(BLDROOT)/concorde.@LIB_SUFFIX@
+$(BLDROOT)/concorde.@LIB_SUFFIX@: $(OBJS)
+	$(AR) $(ARFLAGS) $(BLDROOT)/concorde.@LIB_SUFFIX@ $(OBJS)
+	$(RANLIB) $(BLDROOT)/concorde.@LIB_SUFFIX@
+
+include ../INCLUDE/Makefile.common
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+I=$(CCINCDIR)
+I2=$(BLDROOT)/INCLUDE
+
+checker.$o:  checker.c  $(I)/machdefs.h $(I2)/config.h  
+chunks.$o:   chunks.c   $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/tsp.h      $(I)/edgegen.h  $(I)/bigguy.h   $(I)/lp.h       \
+        $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    $(I)/localcut.h \
+        $(I)/macrorus.h 
+first.$o:    first.c    $(I)/machdefs.h $(I2)/config.h  $(I)/localcut.h \
+        $(I)/tsp.h      $(I)/util.h     $(I)/edgegen.h  $(I)/bigguy.h   \
+        $(I)/lp.h       $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    \
+        $(I)/macrorus.h 
+first_main.$o: first_main.c $(I)/machdefs.h $(I2)/config.h  $(I)/localcut.h \
+        $(I)/tsp.h      $(I)/util.h     $(I)/edgegen.h  $(I)/bigguy.h   \
+        $(I)/lp.h       $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    
+intmat.$o:   intmat.c   $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/localcut.h $(I)/tsp.h      $(I)/edgegen.h  $(I)/bigguy.h   \
+        $(I)/lp.h       $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    \
+        $(I)/macrorus.h 
+lift.$o:     lift.c     $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/localcut.h $(I)/tsp.h      $(I)/edgegen.h  $(I)/bigguy.h   \
+        $(I)/lp.h       $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    \
+        $(I)/macrorus.h 
+loc_main.$o: loc_main.c $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/cut.h      $(I)/tsp.h      $(I)/edgegen.h  $(I)/bigguy.h   \
+        $(I)/lp.h       $(I)/kdtree.h   $(I)/combs.h    $(I)/localcut.h 
+localcut.$o: localcut.c $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/tsp.h      $(I)/edgegen.h  $(I)/bigguy.h   $(I)/lp.h       \
+        $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    $(I)/localcut.h 
+peeler.$o:   peeler.c   $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     
+peeler2.$o:  peeler2.c  $(I)/machdefs.h $(I2)/config.h  $(I)/localcut.h \
+        $(I)/tsp.h      $(I)/util.h     $(I)/edgegen.h  $(I)/bigguy.h   \
+        $(I)/lp.h       $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    
+separate.$o: separate.c $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/lp.h       $(I)/localcut.h $(I)/tsp.h      $(I)/edgegen.h  \
+        $(I)/bigguy.h   $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    
+tsporacl.$o: tsporacl.c $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/localcut.h $(I)/tsp.h      $(I)/edgegen.h  $(I)/bigguy.h   \
+        $(I)/lp.h       $(I)/cut.h      $(I)/kdtree.h   $(I)/combs.h    \
+        $(I)/tinytsp.h  

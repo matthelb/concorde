@@ -1,0 +1,85 @@
+#
+#   This file is part of CONCORDE
+#
+#   (c) Copyright 1995--1999 by David Applegate, Robert Bixby,
+#   Vasek Chvatal, and William Cook
+#
+#   Permission is granted for academic research use.  For other uses,
+#   contact the authors for licensing options.
+#
+#   Use at your own risk.  We make no guarantees about the
+#   correctness or usefulness of this code.
+#
+
+@SET_MAKE@
+SHELL = @MAKESHELL@
+SRCROOT = @top_srcdir@
+BLDROOT = ..
+CCINCDIR=$(SRCROOT)/INCLUDE
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+CC = @CC@
+CFLAGS = @CFLAGS@ @CPPFLAGS@ -I$(BLDROOT)/INCLUDE -I$(CCINCDIR)
+LDFLAGS = @CFLAGS@ @LDFLAGS@
+LIBFLAGS = @LIBS@
+RANLIB = @RANLIB@
+LPSOLVER_LIB = @LPSOLVER_LIB@
+
+OBJ_SUFFIX = @OBJ_SUFFIX@
+o = $(OBJ_SUFFIX)
+
+THISLIB=tiny.@LIB_SUFFIX@
+LIBSRCS=tinytsp.c  bnbmsp.c
+ALLSRCS=tt_main.c  $(LIBSRCS)
+
+LIBS=$(BLDROOT)/BIGGUY/bigguy.@LIB_SUFFIX@  \
+     $(BLDROOT)/LP/lp.@LIB_SUFFIX@              $(BLDROOT)/CUT/cut.@LIB_SUFFIX@         \
+     $(BLDROOT)/TSP/tsp.@LIB_SUFFIX@            $(BLDROOT)/EDGEGEN/edgegen.@LIB_SUFFIX@ \
+     $(BLDROOT)/KDTREE/kdtree.@LIB_SUFFIX@                                   \
+     $(BLDROOT)/COMBS/combs.@LIB_SUFFIX@        $(BLDROOT)/FMATCH/fmatch.@LIB_SUFFIX@   \
+     $(BLDROOT)/UTIL/util.@LIB_SUFFIX@          $(BLDROOT)/PQ/pq.@LIB_SUFFIX@           \
+     $(BLDROOT)/LINKERN/linkern.@LIB_SUFFIX@    $(BLDROOT)/CUT/cut.@LIB_SUFFIX@         \
+     $(BLDROOT)/LOCALCUT/localcut.@LIB_SUFFIX@    $(BLDROOT)/VERIFY/verify.@LIB_SUFFIX@   \
+     $(BLDROOT)/HELDKARP/heldkarp.@LIB_SUFFIX@
+
+all: $(THISLIB)
+
+everything: all tinytsp
+
+tinytsp: tt_main.$o $(THISLIB) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ tt_main.$o $(THISLIB) $(LIBS) $(LPSOLVER_LIB) $(LIBFLAGS)
+
+clean:
+	-rm -f *.$o $(THISLIB) tinytsp@EXE_SUFFIX@
+
+OBJS=$(LIBSRCS:.c=.@OBJ_SUFFIX@)
+
+$(THISLIB): $(OBJS)
+	$(AR) $(ARFLAGS) $(THISLIB) $(OBJS)
+	$(RANLIB) $(THISLIB)
+
+.PHONY: $(BLDROOT)/concorde.@LIB_SUFFIX@
+$(BLDROOT)/concorde.@LIB_SUFFIX@: $(OBJS)
+	$(AR) $(ARFLAGS) $(BLDROOT)/concorde.@LIB_SUFFIX@ $(OBJS)
+	$(RANLIB) $(BLDROOT)/concorde.@LIB_SUFFIX@
+
+include ../INCLUDE/Makefile.common
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+I=$(CCINCDIR)
+I2=$(BLDROOT)/INCLUDE
+
+benttsp.$o:  benttsp.c  $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/tinytsp.h  $(I)/macrorus.h 
+bnbmsp.$o:   bnbmsp.c   $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/tinytsp.h  
+bnbtsp.$o:   bnbtsp.c   $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/tinytsp.h  
+tinytsp.$o:  tinytsp.c  $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/tinytsp.h  $(I)/lp.h       $(I)/bigguy.h   $(I)/cut.h      \
+        $(I)/tsp.h      $(I)/edgegen.h  $(I)/kdtree.h   $(I)/combs.h    
+tt_main.$o:  tt_main.c  $(I)/machdefs.h $(I2)/config.h  $(I)/util.h     \
+        $(I)/tinytsp.h  
