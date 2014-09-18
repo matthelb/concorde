@@ -476,7 +476,7 @@ static int tsp_solve_lp (CCtsp_lp *lp, CCtsp_cutselect *sel, int *out_tour,
         rval = CCtsp_bfs_brancher (lp->probloc, lp->id, lp->lowerbound, sel,
                 sel, &upbound, &bbcount, usebranchcliques,  lp->dat,
                 lp->perm, lp->pool, ncount, tour, hostport, &branchzeit,
-                saveproof, tentative_branch_num, 0, mytbound, hit_timebound,
+                saveproof, tentative_branch_num, 1, mytbound, hit_timebound,
                 silent, rstate);
         if (rval) {
             fprintf (stderr, "CCtsp_bfs_brancher failed\n"); goto CLEANUP;
