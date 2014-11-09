@@ -39,7 +39,7 @@
 #define CCtsp_CUTS_DELTA          /* define to set tolerances on ub-lb */
 #define CCtsp_CUTS_NEXT_TOL (0.01)         /* to try next level  */
 #define CCtsp_CUTS_NEXT_ROUND (0.001)      /* if improve is less, stop round */
-#define CCtsp_TENTATIVE_CUTS_NEXT_TOL (0.1)    
+#define CCtsp_TENTATIVE_CUTS_NEXT_TOL (0.1)
 #define CCtsp_TENTATIVE_CUTS_NEXT_ROUND (0.01)
 #define CCtsp_PRICE_RCTHRESH  (-0.00001)   /* to add a bad edge */
 #define CCtsp_PRICE_MAXPENALTY (0.10)      /* penalty permitted in addbad */
@@ -409,11 +409,11 @@ typedef struct CCtsp_statistics {
     CCtsp_tighten_info tighten_stats;
     CCtsp_tighten_info extra_tighten_stats;
 } CCtsp_statistics;
-    
+
 typedef struct CCtsp_lp {
     CCtsp_lpgraph              graph;
     CCtsp_lpcuts               cuts;
-    CCtsp_lpcuts              *pool; 
+    CCtsp_lpcuts              *pool;
     CCtsp_lpcuts              *remotepool;
     CCtsp_lpcuts              *dominopool;
     CClp                      *lp;
@@ -545,7 +545,7 @@ int
         CCrandstate *rstate),
 #ifdef CC_NETREADY
     CCtsp_grunt (char *hostname, unsigned short hostport, char *poolfname,
-        char *cutbossname, char *probloc, int silent, 
+        char *cutbossname, char *probloc, int silent,
         CCrandstate *rstate),
 #endif /* CC_NETREADY */
     CCtsp_easy_dfs_brancher (CCtsp_lp *lp, CCtsp_cutselect *sel, int depth,
@@ -1307,11 +1307,11 @@ int
     CCtsp_solve_sparse (int ncount, int ecount, int *elist, int *elen,
         int *in_tour, int *out_tour, double *in_val, double *optval,
         int *success, int *foundtour, char *name, double *timebound,
-        int *hit_timebound, int silent, CCrandstate *rstate),
+        int *hit_timebound, int silent, CCrandstate *rstate, int maxchunksize),
     CCtsp_solve_dat (int ncount, CCdatagroup *indat, int *in_tour,
         int *out_tour, double *in_val, double *optval, int *success,
         int *foundtour, char *name, double *timebound, int *hit_timebound,
-        int silent, CCrandstate *rstate);
+        int silent, CCrandstate *rstate, int maxchunksize);
 
 
 
