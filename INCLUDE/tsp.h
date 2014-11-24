@@ -1307,11 +1307,12 @@ int
     CCtsp_solve_sparse (int ncount, int ecount, int *elist, int *elen,
         int *in_tour, int *out_tour, double *in_val, double *optval,
         int *success, int *foundtour, char *name, double *timebound,
-        int *hit_timebound, int silent, CCrandstate *rstate, int maxchunksize),
+        int *hit_timebound, int silent, CCrandstate *rstate, int maxchunksize,
+        int hostport),
     CCtsp_solve_dat (int ncount, CCdatagroup *indat, int *in_tour,
         int *out_tour, double *in_val, double *optval, int *success,
         int *foundtour, char *name, double *timebound, int *hit_timebound,
-        int silent, CCrandstate *rstate, int maxchunksize);
+        int silent, CCrandstate *rstate, int maxchunksize, int hostport);
 
 
 
