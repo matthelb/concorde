@@ -1321,6 +1321,12 @@ CC_SPORT *CCutil_snet_listen (unsigned short p)
     me.sin_family = AF_INET;
     me.sin_port = htons (p);
 
+    int opt_val = 1;
+    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof(int)) < 0) {
+      perror ("setsockopt");
+      fprintf (stderr, "Cannot setsockopt SO_REUSEADDR");
+    }
+
     if (bind (s, (struct sockaddr *) &me, sizeof (me)) < 0) {
         perror ("bind");
         fprintf (stderr, "Cannot bind socket\n");
