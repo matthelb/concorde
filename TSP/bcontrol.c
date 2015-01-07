@@ -802,14 +802,16 @@ int CCtsp_grunt (char *hostname, unsigned short hostport, char *poolfname,
     info.longedge_branching = 0;
     info.silent = silent;
 
-    rval = grunt_send_hello (&info);
+    while (rval = grunt_send_hello (&info)) {
+      sleep(1);
+    }
     if (rval) {
         fprintf (stderr, "send_hello failed\n");
         goto CLEANUP;
     }
 
     if (probloc) info.probloc = probloc;
-    
+
     info.besttour = CC_SAFE_MALLOC (info.ncount, int);
     if (info.besttour == (int *) NULL) {
         fprintf (stderr, "Out of memory in CCtsp_grunt\n");
