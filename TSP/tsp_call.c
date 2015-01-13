@@ -85,7 +85,7 @@ static int
      tsp_solve_lp (CCtsp_lp *lp, CCtsp_cutselect *sel, int *out_tour,
          double *optval, int *success, int *foundtour, double *timebound,
          int *hit_timebound, int silent, CCrandstate *rstate, int maxchunksize,
-         int hostport),
+         int hostport, void (*listen_callback)(void* data), void* callback_data),
      find_good_tour (int ncount, CCdatagroup *dat, int *tour,
          double *val, int trials, CCrandstate *rstate),
      build_edges (int ncount, CCdatagroup *dat, int *ecount, int **elist,
@@ -100,7 +100,7 @@ int CCtsp_solve_sparse (int ncount, int ecount, int *elist, int *elen,
         int *in_tour, int *out_tour, double *in_val, double *optval,
         int *success, int *foundtour, char *name, double *timebound,
         int *hit_timebound, int silent, CCrandstate *rstate,
-        int maxchunksize, int hostport)
+        int maxchunksize, int hostport, void (*listen_callback)(void* data), void* callback_data)
 {
     int rval = 0;
     CCdatagroup dat;
@@ -117,7 +117,8 @@ int CCtsp_solve_sparse (int ncount, int ecount, int *elist, int *elen,
 
     rval = CCtsp_solve_dat (ncount, &dat, in_tour, out_tour, in_val, optval,
                             success, foundtour, name, timebound, hit_timebound,
-                            silent, rstate, maxchunksize, hostport);
+                            silent, rstate, maxchunksize, hostport, listen_callback,
+                            callback_data);
     if (rval) {
         fprintf (stderr, "CCtsp_solve_dat failed\n"); goto CLEANUP;
     }
@@ -131,7 +132,8 @@ CLEANUP:
 int CCtsp_solve_dat (int ncount, CCdatagroup *indat, int *in_tour,
         int *out_tour, double *in_val, double *optval, int *success,
         int *foundtour, char *name, double *timebound, int *hit_timebound,
-        int silent, CCrandstate *rstate, int maxchunksize, int hostport)
+        int silent, CCrandstate *rstate, int maxchunksize, int hostport,
+        void (*listen_callback)(void* data), void* callback_data)
 {
     int i, norm, newtour, rval = 0;
     CCdatagroup dat;
@@ -272,7 +274,7 @@ int CCtsp_solve_dat (int ncount, CCdatagroup *indat, int *in_tour,
 
     rval = tsp_solve_lp (lp, &sel, otour, optval, success, &newtour,
                          mytbound, hit_timebound, silent, rstate, maxchunksize,
-                         hostport);
+                         hostport, listen_callback, callback_data);
     if (rval) {
         fprintf (stderr, "tsp_solve_lp failed\n"); goto CLEANUP;
     }
@@ -344,7 +346,7 @@ CLEANUP:
 static int tsp_solve_lp (CCtsp_lp *lp, CCtsp_cutselect *sel, int *out_tour,
         double *optval, int *success, int *foundtour, double *timebound,
         int *hit_timebound, int silent, CCrandstate *rstate, int maxchunksize,
-        int hostport)
+        int hostport, void (*listen_callback)(void* data), void* callback_data)
 {
     int i, rval = 0;
     int ncount = lp->graph.ncount;
@@ -485,7 +487,7 @@ static int tsp_solve_lp (CCtsp_lp *lp, CCtsp_cutselect *sel, int *out_tour,
                 sel, &upbound, &bbcount, usebranchcliques,  lp->dat,
                 lp->perm, lp->pool, ncount, tour, hostport, &branchzeit,
                 saveproof, tentative_branch_num, 1, mytbound, hit_timebound,
-                silent, rstate);
+                silent, rstate, listen_callback, callback_data);
         if (rval) {
             fprintf (stderr, "CCtsp_bfs_brancher failed\n"); goto CLEANUP;
         }

@@ -342,7 +342,7 @@ int main (int ac, char **av)
                 &tentativesel, &upbound, &bbcount, usebranchcliques, &dat,
                 ptour, pool, ncount, besttour, hostport, &branchzeit,
                 save_proof, tentative_branch_num, longedge_branching,
-                (double *) NULL, (int *) NULL, silent, &rstate);
+                (double *) NULL, (int *) NULL, silent, &rstate, 0, 0);
         CCcheck_rval (rval, "CCtsp_bfs_restart failed");
         goto DONE;
     }
@@ -558,11 +558,11 @@ int main (int ac, char **av)
         CCcheck_rval (rval, "CCtsp_write_probroot_id failed");
         CCtsp_free_tsp_lp_struct (&lp);
 
-        rval = CCtsp_bfs_brancher (problname, id, lowbound, &sel, 
+        rval = CCtsp_bfs_brancher (problname, id, lowbound, &sel,
                 &tentativesel, &upbound, &bbcount, usebranchcliques, &dat,
                 ptour, pool, ncount, besttour, hostport, &branchzeit,
                 save_proof, tentative_branch_num, longedge_branching,
-                (double *) NULL, (int *) NULL, silent, &rstate);
+                (double *) NULL, (int *) NULL, silent, &rstate, 0, 0);
         CCcheck_rval (rval, "CCtsp_bfs_brancher failed");
     }
 

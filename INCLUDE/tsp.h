@@ -535,14 +535,14 @@ int
         CCtsp_lpcuts *pool, int ncount, int *besttour, unsigned short hostport,
         double *branchzeit, int save_proof, int tentative_branch_num,
         int longedge_branching, double *timebound, int *hit_timebound,
-        int silent, CCrandstate *rstate),
+        int silent, CCrandstate *rstate, void (*listen_callback)(void* data), void* callback_data),
     CCtsp_bfs_restart (char *probloc, char *restart_name, CCtsp_cutselect *sel,
         CCtsp_cutselect *tsel, double *upbound, int *bbcount, int usecliques,
         CCdatagroup *dat, int *ptour, CCtsp_lpcuts *pool, int ncount,
         int *besttour, unsigned short hostport, double *branchzeit,
         int save_proof, int tentative_branch_num, int longedge_branching,
         double *timebound, int *hit_timebound, int silent,
-        CCrandstate *rstate),
+        CCrandstate *rstate, void (*listen_callback)(void* data), void* callback_data),
 #ifdef CC_NETREADY
     CCtsp_grunt (char *hostname, unsigned short hostport, char *poolfname,
         char *cutbossname, char *probloc, int silent,
@@ -1308,11 +1308,12 @@ int
         int *in_tour, int *out_tour, double *in_val, double *optval,
         int *success, int *foundtour, char *name, double *timebound,
         int *hit_timebound, int silent, CCrandstate *rstate, int maxchunksize,
-        int hostport),
+        int hostport, void (*listen_callback)(void* data), void* callback_data),
     CCtsp_solve_dat (int ncount, CCdatagroup *indat, int *in_tour,
         int *out_tour, double *in_val, double *optval, int *success,
         int *foundtour, char *name, double *timebound, int *hit_timebound,
-        int silent, CCrandstate *rstate, int maxchunksize, int hostport);
+        int silent, CCrandstate *rstate, int maxchunksize, int hostport,
+        void (*listen_callback)(void* data), void* callback_data);
 
 
 

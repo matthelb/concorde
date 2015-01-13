@@ -172,6 +172,8 @@ typedef struct tsp_bbinfo {
     int longedge_branching;
     int silent;
     CCptrworld bbnode_world;
+    void (*listen_callback)(void* data);
+    void* callback_data;
 } tsp_bbinfo;
 
 typedef struct tsp_treport {
@@ -285,7 +287,7 @@ int CCtsp_bfs_brancher (char *probloc, int id, double lowerbound,
         unsigned short hostport, double *branchzeit, int save_proof,
         int tentative_branch_num, int longedge_branching,
         double *timebound, int *hit_timebound, int silent,
-        CCrandstate *rstate)
+        CCrandstate *rstate, void (*listen_callback)(void* data), void* callback_data)
 {
     int rval = 0;
     tsp_bbnode *rootbbnode  = (tsp_bbnode *) NULL;
@@ -349,6 +351,8 @@ int CCtsp_bfs_brancher (char *probloc, int id, double lowerbound,
     info.tentative_branch_num = tentative_branch_num;
     info.longedge_branching = longedge_branching;
     info.silent = silent;
+    info.listen_callback = listen_callback;
+    info.callback_data = callback_data;
 
     if ((unsigned int) hostport == 0) {
         rval = bfs_process (&info, rstate, timebound, hit_timebound);
@@ -382,7 +386,7 @@ int CCtsp_bfs_restart (char *probloc, char *restart_name, CCtsp_cutselect *sel,
         int *besttour, unsigned short hostport, double *branchzeit,
         int save_proof, int tentative_branch_num, int longedge_branching,
         double *timebound, int *hit_timebound, int silent,
-        CCrandstate *rstate)
+        CCrandstate *rstate, void (*listen_callback)(void* data), void* callback_data)
 {
     int rval = 0;
     tsp_bbnode *rootbbnode  = (tsp_bbnode *) NULL;
@@ -441,7 +445,9 @@ int CCtsp_bfs_restart (char *probloc, char *restart_name, CCtsp_cutselect *sel,
     info.tentative_branch_num = tentative_branch_num;
     info.longedge_branching = longedge_branching;
     info.silent = silent;
-    
+    info.listen_callback = listen_callback;
+    info.callback_data = callback_data;
+
     if ((unsigned int) hostport == 0) {
         rval = bfs_process (&info, rstate, timebound, hit_timebound);
         if (rval) {
@@ -594,9 +600,13 @@ static int net_process (tsp_bbinfo *info)
         fprintf (stderr, "CCutil_snet_listen failed\n");
         rval = 1; goto CLEANUP;
     }
-    
+
     info->finished = 0;
     info->changed  = 0;
+
+    if (info->listen_callback) {
+      info->listen_callback(info->callback_data);
+    }
 
     while (info->finished == 0) {
         rval = process_connection (p, info);
@@ -802,9 +812,7 @@ int CCtsp_grunt (char *hostname, unsigned short hostport, char *poolfname,
     info.longedge_branching = 0;
     info.silent = silent;
 
-    while (rval = grunt_send_hello (&info)) {
-      sleep(1);
-    }
+    rval = grunt_send_hello (&info);
     if (rval) {
         fprintf (stderr, "send_hello failed\n");
         goto CLEANUP;

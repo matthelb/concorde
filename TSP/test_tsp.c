@@ -112,7 +112,7 @@ int main (int ac, char **av)
     } else {
         rval = CCtsp_solve_dat (ncount, &dat, in_tour, out_tour, mybnd,
                  &optval, &success, &foundtour, probname, mytimebound,
-                 &hit_timebound, run_silently, &rstate, 0, 0);
+                 &hit_timebound, run_silently, &rstate, 0, 0, 0);
         if (rval) {
             fprintf (stderr, "CCtsp_solve_dat failed\n"); goto CLEANUP;
         }
