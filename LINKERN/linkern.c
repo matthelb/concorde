@@ -1176,7 +1176,7 @@ static int weird_second_step (graph *G, distobj *D, adddel *E, aqueue *Q,
                         markedge_del (t7, t8, E);
                         hit = step (G, D, E, Q, F, 3, gain, &Gstar, t1, t8,
                                     fstack, intptr_world, edgelook_world);
-                        unmarkedge_del (t6, t7, E);
+                        unmarkedge_add (t6, t7, E);
                         unmarkedge_del (t7, t8, E);
 
                         if (!hit && Gstar) 
