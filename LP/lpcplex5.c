@@ -198,7 +198,7 @@ int CClp_init (CClp **lp)
         goto CLEANUP;
     }
 
-    /* REB, 14 October 1997:  The following three parameter settings 
+    /* REB, 14 October 1997:  The following three parameter settings
        help fl3795 a bunch, and are probably not a bad idea in general */
 
     rval = CPXsetdblparam ((*lp)->cplex_env, CPX_PARAM_EPPER, 1.0E-6);
@@ -428,12 +428,12 @@ static int primalopt (CClp *lp)
     int solstat;
 #ifdef  CC_CPLEX_WRITE_PRIMAL
     static int  probcnt = 0;
-    char probname[100];
+    char probname[512];
 
     sprintf (probname, "prim%d.sav", probcnt);
     probcnt++;
     printf ("Writing %s\n", probname);
-    CPXsavwrite (lp->cplex_env, lp->cplex_lp, probname);
+    CPXwriteprob (lp->cplex_env, lp->cplex_lp, probname, NULL);
 #endif
 
     rval = CPXprimopt (lp->cplex_env, lp->cplex_lp);
@@ -492,12 +492,12 @@ static int dualopt (CClp *lp)
     int solstat;
 #ifdef  CC_CPLEX_WRITE_DUAL
     static int  probcnt = 0;
-    char probname[100];
+    char probname[512];
 
     sprintf (probname, "dual%d.sav", probcnt);
     probcnt++;
     printf ("Writing %s\n", probname);
-    CPXsavwrite (lp->cplex_env, lp->cplex_lp, probname);
+    CPXwriteprob (lp->cplex_env, lp->cplex_lp, probname, NULL);
 #endif
 
     rval = CPXdualopt (lp->cplex_env, lp->cplex_lp);
@@ -564,12 +564,12 @@ static int baropt (CClp *lp)
     int solstat;
 #ifdef CC_CPLEX_WRITE_BARRIER
     static int  probcnt = 0;
-    char probname[100];
+    char probname[512];
 
     sprintf (probname, "barrier%d.sav", probcnt);
     probcnt++;
     printf ("Writing %s\n", probname);
-    CPXsavwrite (lp->cplex_env, lp->cplex_lp, probname);
+    CPXwriteprob (lp->cplex_env, lp->cplex_lp, probname, NULL);
 #endif
 
     rval = CPXbaropt (lp->cplex_env, lp->cplex_lp);
@@ -893,7 +893,7 @@ int CClp_delete_set_of_rows (CClp *lp, int *delstat)
         fprintf (stderr, "CPXpivotin failed, continuing anyway\n");
     }
     CC_FREE (dellist, int);
-    
+
     rval = CPXdelsetrows (lp->cplex_env, lp->cplex_lp, delstat);
     if (rval) fprintf (stderr, "CPXdelsetrows failed\n");
     return rval;
@@ -987,7 +987,7 @@ int CClp_delete_set_of_columns (CClp *lp, int *delstat)
     if (CPXchgbds (lp->cplex_env, lp->cplex_lp, delcnt, dellist, lu, bd)) {
         fprintf (stderr, "CPXchgbds failed, stumbling on anyway\n");
     }
-    
+
     if (CPXdualopt (lp->cplex_env, lp->cplex_lp)) {
         fprintf (stderr, "CPXdualopt failed, continuing anyway\n");
     }
@@ -999,7 +999,7 @@ int CClp_delete_set_of_columns (CClp *lp, int *delstat)
     CC_FREE (dellist, int);
     CC_FREE (lu, char);
     CC_FREE (bd, double);
-    
+
     rval = CPXdelsetcols (lp->cplex_env, lp->cplex_lp, delstat);
     if (rval) fprintf (stderr, "CPXdelsetcols failed\n");
     return rval;
@@ -1233,7 +1233,7 @@ int CClp_sread_warmstart (CC_SFILE *f, CClp_warmstart **w)
 
     (*w)->ccount = ccount;
     (*w)->rcount = rcount;
-    
+
     return 0;
 
 CLEANUP:
@@ -1558,15 +1558,10 @@ int CClp_getweight (CClp *lp, int nrows, int *rmatbeg, int *rmatind,
 int CClp_dump_lp (CClp *lp, const char *fname)
 {
     int rval = 0;
-    char nambuf[32];
 
-    /* We copy the name since CPXsavwrite doesn't declare fname as const */
-    strncpy (nambuf, fname, sizeof (nambuf));
-    nambuf[sizeof(nambuf)-1] = '\0';
-
-    rval = CPXsavwrite (lp->cplex_env, lp->cplex_lp, nambuf);
+    rval = CPXwriteprob (lp->cplex_env, lp->cplex_lp, fname, NULL);
     if (rval) {
-        fprintf (stderr, "CPXsavwrite failed\n");
+        fprintf (stderr, "CPXwriteprob failed\n");
     }
     return rval;
 }
@@ -1672,7 +1667,7 @@ int CClp_getgoodlist (CClp *lp, int *goodlist, int *goodlen_p,
     }
 
     rval = 0;
-    
+
 CLEANUP:
 
     CC_IFFREE (cstat, int);
@@ -1745,12 +1740,12 @@ int CClp_strongbranch (CClp *lp, int *candidatelist, int ncand,
     if (rval) {
         fprintf (stderr, "CPXsetdblparam failed\n"); return rval;
     }
-    
+
     for (i=0; i<ncand; i++) {
         if (downpen[i] > upperbound) downpen[i] = upperbound;
         if (uppen[i] > upperbound) uppen[i] = upperbound;
     }
-    
+
     return 0;
 }
 
@@ -1881,7 +1876,7 @@ CLEANUP:
 static int set_parameters (CPXENVptr cplex_env, CClp_parameters *params)
 {
     int rval;
-    
+
     /* the documentation doesn't say what the return value means */
     rval = CPXsetintparam (cplex_env, CPX_PARAM_SCRIND, params->scrind);
     if (rval) {
@@ -1932,7 +1927,7 @@ static int set_parameters (CPXENVptr cplex_env, CClp_parameters *params)
         fprintf (stderr, "CPXsetdblparam CPX_PARAM_EPRHS failed\n");
         goto CLEANUP;
     }
-    
+
     rval = CPXsetintparam (cplex_env, CPX_PARAM_PERIND, params->perind);
     if (rval) {
         fprintf (stderr, "CPXsetintparam CPX_PARAM_PERIND failed\n");
